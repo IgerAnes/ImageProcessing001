@@ -106,85 +106,137 @@ ATF = AdaptiveThresholdFunc()
 
 MainWindow = tk.Tk()
 MainWindow.title("Graghic User Interface")
-MainWindow.geometry("600x600")
+MainWindow.geometry("700x400")
+# MainWindow.grid_rowconfigure(1, weight = 1)
+# MainWindow.grid_columnconfigure(0, weight = 1)
 
-Label_title01 = tk.Label(MainWindow, text = "1. Image Processing")
-Label_title01.grid(row = 0, column = 0, padx = 10, pady = 5)
+Frame_P1 = tk.Frame(MainWindow)
+Frame_P1.grid(column = 0, row = 0, sticky = "wn")
 
-Label_title02 = tk.Label(MainWindow, text = "2. Adaptive Threshold")
-Label_title02.grid(row = 0, column = 1, padx = 10, pady = 5)
+Frame_P2 = tk.Frame(MainWindow)
+Frame_P2.grid(column = 1, row = 0, sticky = "wn")
 
-Label_title03 = tk.Label(MainWindow, text = "3. Image Transformation")
-Label_title03.grid(row = 0, column = 2, padx = 10, pady = 5)
+Frame_P3 = tk.Frame(MainWindow) #If we put grid behind this case, it will set to MainWin not the frame we create
+Frame_P3.grid(column = 2, row = 0, sticky = "wn")
 
-Label_subtitle01 = tk.Label(MainWindow, text = "3.1 Rot, scale, Translate")
-Label_subtitle01.grid(row = 1, column = 2)
+Frame_P3_part1 = tk.Frame(Frame_P3)
+Frame_P3_part1.grid(column = 0, row = 1)
 
-Label_subtitle02 = tk.Label(MainWindow, text = "Parameters")
-Label_subtitle02.grid(row = 2, column = 2, padx = 20, pady = 4)
+Frame_P3_para = tk.Frame(Frame_P3_part1)
+Frame_P3_para.grid(column = 0, row = 1)
 
-Label_Angeltitle = tk.Label(MainWindow, text = "Angel:")
-Label_Angeltitle.grid(row = 3, column = 3, padx = 5, pady = 2)
+Frame_P4 = tk.Frame(Frame_P2)
+Frame_P4.grid(column = 0, row = 3)
 
-Label_Scaletitle = tk.Label(MainWindow, text = "Scale:")
-Label_Scaletitle.grid(row = 4, column = 3, padx = 5, pady = 2)
+# ------------------------label------------------------------------
+Label_title01 = tk.Label(Frame_P1, text = "1. Image Processing")
+Label_title01.grid(row = 0, column = 0, padx = 10, pady = 5, sticky = "W")
 
-Label_Txtitle = tk.Label(MainWindow, text = "Tx:")
-Label_Txtitle.grid(row = 5, column = 3, padx = 5, pady = 2)
+Label_title02 = tk.Label(Frame_P2, text = "2. Adaptive Threshold")
+Label_title02.grid(row = 0, column = 0, padx = 10, pady = 5, sticky = "W")
 
-Label_Tytitle = tk.Label(MainWindow, text = "Ty:")
-Label_Tytitle.grid(row = 6, column = 3, padx = 5, pady = 2)
+Label_title03 = tk.Label(Frame_P3, text = "3. Image Transformation")
+Label_title03.grid(row = 0, column = 0, padx = 10, pady = 5, sticky = "W")
 
-Label_AngelUnit = tk.Label(MainWindow, text = "deg")
-Label_AngelUnit.grid(row = 3, column = 5, padx = 10, pady = 5)
+Label_title04 = tk.Label(Frame_P4, text = "4. Convolution")
+Label_title04.grid(row = 0, column = 0, padx = 10, pady = 5, sticky = "W")
 
-Label_TxUnit = tk.Label(MainWindow, text = "pixel")
-Label_TxUnit.grid(row = 5, column = 5, padx = 10, pady = 5)
+Label_subtitle01 = tk.Label(Frame_P3_part1, text = "3.1 Rot, scale, Translate")
+Label_subtitle01.grid(row = 0, column = 0, sticky = "W", padx = 15)
 
-Label_TyUnit = tk.Label(MainWindow, text = "pixel")
-Label_TyUnit.grid(row = 6, column = 5, padx = 10, pady = 5)
+Label_subtitle02 = tk.Label(Frame_P3_para, text = "Parameters")
+Label_subtitle02.grid(row = 0, column = 0, padx = 18, pady = 4, sticky = "E")
 
-Entry_AngelValue = tk.Entry(MainWindow)
-Entry_AngelValue.grid(row = 3, column = 4)
+Label_Angeltitle = tk.Label(Frame_P3_para, text = "Angel:")
+Label_Angeltitle.grid(row = 1, column = 0, padx = 2, pady = 2, sticky = "E")
 
-Entry_ScaleValue = tk.Entry(MainWindow)
-Entry_ScaleValue.grid(row = 4, column = 4)
+Label_Scaletitle = tk.Label(Frame_P3_para, text = "Scale:")
+Label_Scaletitle.grid(row = 2, column = 0, padx = 2, pady = 2, sticky = "E")
 
-Entry_TxValue = tk.Entry(MainWindow)
-Entry_TxValue.grid(row = 5, column = 4)
+Label_Txtitle = tk.Label(Frame_P3_para, text = "Tx:")
+Label_Txtitle.grid(row = 3, column = 0, padx = 2, pady = 2, sticky = "E")
 
-Entry_TyValue = tk.Entry(MainWindow)
-Entry_TyValue.grid(row = 6, column = 4)
+Label_Tytitle = tk.Label(Frame_P3_para, text = "Ty:")
+Label_Tytitle.grid(row = 4, column = 0, padx = 2, pady = 2, sticky = "E")
 
-Button_LoadImage = tk.Button(MainWindow, text = "1.1 Load Image", 
+Label_AngelUnit = tk.Label(Frame_P3_para, text = "deg")
+Label_AngelUnit.grid(row = 1, column = 2, padx = 5, pady = 5)
+
+Label_TxUnit = tk.Label(Frame_P3_para, text = "pixel")
+Label_TxUnit.grid(row = 3, column = 2, padx = 5, pady = 5)
+
+Label_TyUnit = tk.Label(Frame_P3_para, text = "pixel")
+Label_TyUnit.grid(row = 4, column = 2, padx = 5, pady = 5)
+
+# ------------------------entry------------------------------------
+Entry_AngelValue = tk.Entry(Frame_P3_para)
+Entry_AngelValue.grid(row = 1, column = 1)
+
+Entry_ScaleValue = tk.Entry(Frame_P3_para)
+Entry_ScaleValue.grid(row = 2, column = 1)
+
+Entry_TxValue = tk.Entry(Frame_P3_para)
+Entry_TxValue.grid(row = 3, column = 1)
+
+Entry_TyValue = tk.Entry(Frame_P3_para)
+Entry_TyValue.grid(row = 4, column = 1)
+
+# ------------------------button------------------------------------
+# ------------------------button for frame1-------------------------
+Button_LoadImage = tk.Button(Frame_P1, text = "1.1 Load Image", 
 command = lambda:IPF.ChooseAndLoadImage(),
 width = "20", height = "1")
 Button_LoadImage.grid(row = 1, column = 0, padx = 8, pady = 8)
 
-Button_ColorConversion = tk.Button(MainWindow, text = "1.2 Color Conversion",
+Button_ColorConversion = tk.Button(Frame_P1, text = "1.2 Color Conversion",
 command = lambda:IPF.ColorConversion(),
 width = "20", height = "1")
 Button_ColorConversion.grid(row = 2, column = 0, padx = 8, pady = 8)
 
-Button_ImageFlipping = tk.Button(MainWindow, text = "1.3 Image Flipping",
+Button_ImageFlipping = tk.Button(Frame_P1, text = "1.3 Image Flipping",
 command = lambda:IPF.ImageFlipping(),
 width = "20", height = "1")
 Button_ImageFlipping.grid(row = 3, column = 0, padx = 8, pady = 8)
 
-Button_ImageBlended = tk.Button(MainWindow, text = "1.4 Image Blended",
+Button_ImageBlended = tk.Button(Frame_P1, text = "1.4 Image Blended",
 command = lambda:IPF.ImageBlended(),
 width = "20", height = "1")
 Button_ImageBlended.grid(row = 4, column = 0, padx = 8, pady = 8)
 
-Button_GlobalThreshold = tk.Button(MainWindow, text = "2.1 Global Threshold",
+# ------------------------button for frame2-------------------------
+Button_GlobalThreshold = tk.Button(Frame_P2, text = "2.1 Global Threshold",
 command = lambda:ATF.Global_Threshold(),
 width = "20", height = "1")
-Button_GlobalThreshold.grid(row = 1, column = 1, padx = 8, pady = 8)
+Button_GlobalThreshold.grid(row = 1, column = 0, padx = 8, pady = 8)
 
-Button_LocalThreshold = tk.Button(MainWindow, text = "2.2 Local Threshold",
+Button_LocalThreshold = tk.Button(Frame_P2, text = "2.2 Local Threshold",
 command = lambda:ATF.Local_Threshold(),
 width = "20", height = "1")
-Button_LocalThreshold.grid(row = 2, column = 1, padx = 8, pady = 8)
+Button_LocalThreshold.grid(row = 2, column = 0, padx = 8, pady = 8)
+# ------------------------button for frame3-------------------------
+Button_Rotation_etc = tk.Button(Frame_P3_part1, text = "3.1 Rotation, scaling, translation",
+width = "30", height = "1")
+Button_Rotation_etc.grid(row = 2, column = 0, padx = 8, pady = 8)
+
+Button_Perspective = tk.Button(Frame_P3, text = "3.2 Perspective Transform",
+width = "25", height = "1")
+Button_Perspective.grid(row = 2, column = 0, padx = 8, pady = 8)
+# ------------------------button for frame4-------------------------
+Button_Guassian = tk.Button(Frame_P4, text = "4.1 Gaussian",
+width = "20", height = "1")
+Button_Guassian.grid(row = 1, column = 0, padx = 8, pady = 8)
+
+Button_SobelX = tk.Button(Frame_P4, text = "4.2 Sobel X",
+width = "20", height = "1")
+Button_SobelX.grid(row = 2, column = 0, padx = 8, pady = 8)
+
+Button_SobelY = tk.Button(Frame_P4, text = "4.3 Sobel Y",
+width = "20", height = "1")
+Button_SobelY.grid(row = 3, column = 0, padx = 8, pady = 8)
+
+Button_Magnitude = tk.Button(Frame_P4, text = "4.4 Magnitude",
+width = "20", height = "1")
+Button_Magnitude.grid(row = 4, column = 0, padx = 8, pady = 8)
 
 if __name__ == '__main__':
     MainWindow.mainloop()
