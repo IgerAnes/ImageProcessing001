@@ -101,8 +101,111 @@ class AdaptiveThresholdFunc:
                                                             cv2.THRESH_BINARY, 19, -1)
         cv2.imshow("Local Threshold Result",self.LocalThresholdImage) 
 
+class ImageTransformationFunc:
+    def __init__(self):
+        self.OpenImage = []
+        self.RotateImage = []
+        self.TranslateImage = []
+        self.PerspectiveImage = []
+
+    def ChooseAndLoadImage(self):
+        self.OpenImage = []
+        self.filename = filedialog.askopenfilename( initialdir = "C:/User/USER/Pictures",
+        title = "Select Image",
+        filetype = (("png files","*.png"),("All file","*.*")))
+
+        if(self.filename == ""):
+            print("you have not choose the Image, Please choose again.")
+        else:
+            self.OpenImage = cv2.imread(self.filename)
+            self.OriginImage = cv2.imread(self.filename)
+
+    def Rotation_Scaling_Translation(self):
+        # ------------GetValue---------------
+        self.angel_value = int(Entry_AngelValue.get())
+        self.scale_value = float(Entry_ScaleValue.get())
+        self.Tx_value = int(Entry_TxValue.get())
+        self.Ty_value = int(Entry_TyValue.get())
+        # -----------ImageLoad---------------
+        self.ChooseAndLoadImage()
+        # ------------rotate-----------------
+        self.RotateMatrix = cv2.getRotationMatrix2D((130,125), self.angel_value, self.scale_value)
+        self.RotateImage = cv2.warpAffine(self.OpenImage, self.RotateMatrix, 
+                                            (self.OpenImage.shape[1],self.OpenImage.shape[0]))
+        cv2.imshow("Translate Result",self.RotateImage)
+        # -----------translate---------------
+        self.Matrix = np.float32([[1, 0, self.Tx_value], [0, 1, self.Ty_value]])
+        self.TranslateImage = cv2.warpAffine(self.RotateImage, self.Matrix,
+                                                 (self.RotateImage.shape[1],self.RotateImage.shape[0]))
+        cv2.imshow("Translate Result", self.TranslateImage)
+
+    def Perspective_Transformation(self):
+        # -----------Initialize--------------
+        self.PositionXYList = []
+        # ------------LoadImage--------------
+        self.ChooseAndLoadImage()
+        # -----------buttonClick-------------
+        def click_event(event, x, y, flags, param):
+            if (len(self.PositionXYList) == 4):
+                cv2.destroyAllWindows()
+                self.pts1 = np.float32([self.PositionXYList[0], self.PositionXYList[1],
+                                self.PositionXYList[2], self.PositionXYList[3]])
+                self.pts2 = np.float32([[0,0], [490,0], [490,490], [0,490]]) # resize the display image 490 x 490
+                self.PTMatrix = cv2.getPerspectiveTransform(self.pts1, self.pts2)
+                self.PerspectiveImage = cv2.warpPerspective(self.OriginImage, self.PTMatrix, (490, 490))
+                cv2.imshow("Perspective transformation Result", self.PerspectiveImage)
+
+            elif (event == cv2.EVENT_LBUTTONDOWN):
+                self.PositionXYList.append([x, y]) 
+                # list.append() will return None so if you use list = list.append will become notype
+                cv2.circle(self.OpenImage, (x, y), 5, (0, 0, 255), -1) #circle(image, pos. , radius, color, line_size) 
+                cv2.imshow("Image", self.OpenImage)
+        # ----perspective transformation-----
+        cv2.imshow("Image",self.OpenImage)
+        cv2.setMouseCallback("Image",click_event)
+
+class ConvolutionFunc:
+    def __init__(self):
+        self.OpenImage = []
+
+    def ChooseAndLoadImage(self):
+        self.OpenImage = []
+        self.filename = filedialog.askopenfilename( initialdir = "C:/User/USER/Pictures",
+        title = "Select Image",
+        filetype = (("jpeg files","*.jpg"),("All file","*.*")))
+
+        if(self.filename == ""):
+            print("you have not choose the Image, Please choose again.")
+        else:
+            self.OpenImage = plt.imread(self.filename)
+            self.OpenImage = cv2.cvtColor(self.OpenImage, cv2.COLOR_RGB2GRAY)
+            cv2.imshow("Open Image", self.OpenImage)
+    
+    def Gaussian_Filter(self):
+        # ---------------Load Image------------------------------
+        self.ChooseAndLoadImage()
+        # ---------------create a Gaussian Kernal----------------
+        self.x, self.y = np.mgrid[-1:2, -1:2]
+        self.gaussian_kernal = np.exp(-(self.x**2 + self.y**2))
+        self.gaussian_kernal = self.gaussian_kernal / self.gaussian_kernal.sum()
+        print(self.gaussian_kernal)
+        # ---------------start to use kernal for convolution------
+        self.kernal = np.flipud(np.fliplr(self.gaussian_kernal))
+        self.output = np.zeros_like(self.OpenImage)
+        self.ImagePadded = np.zeros((self.OpenImage.shape[0] + 2, self.OpenImage.shape[1] + 2))
+        self.ImagePadded[1:-1 , 1:-1] = self.OpenImage
+        for i in range(self.OpenImage.shape[1]):
+            for j in range(self.OpenImage.shape[0]):
+                self.output[j,i] = (self.kernal*self.ImagePadded[ j:j+3 , i:i+3 ]).sum()
+        cv2.imshow("Gaussian Result", self.output)
+    
+
+
+
 IPF = ImageProcessingFunc()
 ATF = AdaptiveThresholdFunc()
+ITF = ImageTransformationFunc()
+CF = ConvolutionFunc()
 
 MainWindow = tk.Tk()
 MainWindow.title("Graghic User Interface")
@@ -215,14 +318,17 @@ width = "20", height = "1")
 Button_LocalThreshold.grid(row = 2, column = 0, padx = 8, pady = 8)
 # ------------------------button for frame3-------------------------
 Button_Rotation_etc = tk.Button(Frame_P3_part1, text = "3.1 Rotation, scaling, translation",
+command = lambda:ITF.Rotation_Scaling_Translation(),
 width = "30", height = "1")
 Button_Rotation_etc.grid(row = 2, column = 0, padx = 8, pady = 8)
 
 Button_Perspective = tk.Button(Frame_P3, text = "3.2 Perspective Transform",
+command = lambda:ITF.Perspective_Transformation(),
 width = "25", height = "1")
 Button_Perspective.grid(row = 2, column = 0, padx = 8, pady = 8)
 # ------------------------button for frame4-------------------------
 Button_Guassian = tk.Button(Frame_P4, text = "4.1 Gaussian",
+command = lambda:CF.Gaussian_Filter(),
 width = "20", height = "1")
 Button_Guassian.grid(row = 1, column = 0, padx = 8, pady = 8)
 
