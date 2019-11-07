@@ -167,6 +167,10 @@ class ImageTransformationFunc:
 class ConvolutionFunc:
     def __init__(self):
         self.OpenImage = []
+        self.GaussianImage = []
+        self.SobelXImage = []
+        self.SobelYImage = []
+        self.MagnitudeImage = []
 
     def ChooseAndLoadImage(self):
         self.OpenImage = []
@@ -177,8 +181,8 @@ class ConvolutionFunc:
         if(self.filename == ""):
             print("you have not choose the Image, Please choose again.")
         else:
-            self.OpenImage = plt.imread(self.filename)
-            self.OpenImage = cv2.cvtColor(self.OpenImage, cv2.COLOR_RGB2GRAY)
+            self.OpenImage = cv2.imread(self.filename)
+            self.OpenImage = cv2.cvtColor(self.OpenImage, cv2.COLOR_RGB2GRAY) # default data type is uint8 0 ~ 255
             cv2.imshow("Open Image", self.OpenImage)
     
     def Gaussian_Filter(self):
@@ -188,17 +192,68 @@ class ConvolutionFunc:
         self.x, self.y = np.mgrid[-1:2, -1:2]
         self.gaussian_kernal = np.exp(-(self.x**2 + self.y**2))
         self.gaussian_kernal = self.gaussian_kernal / self.gaussian_kernal.sum()
-        print(self.gaussian_kernal)
+        self.gaussian_kernal = np.flipud(np.fliplr(self.gaussian_kernal))
         # ---------------start to use kernal for convolution------
-        self.kernal = np.flipud(np.fliplr(self.gaussian_kernal))
-        self.output = np.zeros_like(self.OpenImage)
-        self.ImagePadded = np.zeros((self.OpenImage.shape[0] + 2, self.OpenImage.shape[1] + 2))
-        self.ImagePadded[1:-1 , 1:-1] = self.OpenImage
-        for i in range(self.OpenImage.shape[1]):
-            for j in range(self.OpenImage.shape[0]):
-                self.output[j,i] = (self.kernal*self.ImagePadded[ j:j+3 , i:i+3 ]).sum()
-        cv2.imshow("Gaussian Result", self.output)
-    
+        # self.kernal = np.flipud(np.fliplr(self.gaussian_kernal))
+        # self.OutputImage = np.zeros_like(self.OpenImage)
+        # self.ImagePadded = np.zeros((self.OpenImage.shape[0] + 2, self.OpenImage.shape[1] + 2))
+        # self.ImagePadded[1:-1 , 1:-1] = self.OpenImage
+        # for i in range(self.OpenImage.shape[1]):
+        #     for j in range(self.OpenImage.shape[0]):
+        #         self.OutputImage[j,i] = (self.kernal*self.ImagePadded[ j:j+3 , i:i+3 ]).sum()
+        self.GaussianImage = self.Convolution(self.OpenImage, self.gaussian_kernal)
+        cv2.imshow("Gaussian Result", self.GaussianImage)
+
+    def Convolution(self, image, kernal):      
+        kernal_row, kernal_col = kernal.shape
+        pad_height = int((kernal_row - 1)/2)
+        pad_width = int((kernal_col - 1)/2)
+
+        OutputImage = np.zeros_like(image, dtype = np.uint8)
+        ImagePadded = np.zeros((image.shape[0] + (2 * pad_height),
+                                 image.shape[1] + (2 * pad_width)))
+        ImagePadded[pad_height:ImagePadded.shape[0] - pad_height,
+                     pad_width:ImagePadded.shape[1] - pad_width] = image
+        # ImagePadded[pad_height:-1,
+        #              pad_width:-1] = image
+        kernal_sum = np.sum(kernal)
+        if(kernal_sum == 0):
+            for row in range(image.shape[0]):
+                for col in range(image.shape[1]):
+                    OutputImage[row, col] = np.abs(np.sum(kernal* ImagePadded[ row:row + kernal_row , 
+                                                    col:col + kernal_col ])) / 2
+        else:
+            for row in range(image.shape[0]):
+                for col in range(image.shape[1]):
+                    OutputImage[row, col] = np.abs(np.sum(kernal* ImagePadded[ row:row + kernal_row , 
+                                                    col:col + kernal_col ])) / kernal_sum
+        return OutputImage
+
+    def Sobel_X(self):
+        # -------------Continue Image above---------------------
+        # -------------set vertical filter mask-----------------
+        self.verticalMatrix = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        self.SobelXImage = self.Convolution(self.GaussianImage, self.verticalMatrix)
+        cv2.imshow("Sobel X Result", self.SobelXImage)
+
+    def Sobel_Y(self):
+        # -------------Continue Image above---------------------
+        # -------------set horizontal filter mask-----------------
+        self.horizontalMatrix = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+        self.SobelYImage = self.Convolution(self.GaussianImage, self.horizontalMatrix)
+        cv2.imshow("Sobel Y Result", self.SobelYImage)
+
+    def Magnitude(self):
+        # -------------Continue Image above---------------------
+        # -------------start Magnitude process-----------------
+        self.MagnitudeImage = np.sqrt(np.square(self.SobelXImage /8) +
+                                        np.square(self.SobelYImage /8))
+        self.MagnitudeImage *= 255.0 / self.MagnitudeImage.max()
+        print("aaaa")
+        print("before:", self.MagnitudeImage)
+        self.MagnitudeImage = np.uint8(self.MagnitudeImage)
+        print("after:", self.MagnitudeImage)
+        cv2.imshow("Magnitude Result", self.MagnitudeImage)
 
 
 
@@ -333,14 +388,17 @@ width = "20", height = "1")
 Button_Guassian.grid(row = 1, column = 0, padx = 8, pady = 8)
 
 Button_SobelX = tk.Button(Frame_P4, text = "4.2 Sobel X",
+command = lambda:CF.Sobel_X(),
 width = "20", height = "1")
 Button_SobelX.grid(row = 2, column = 0, padx = 8, pady = 8)
 
 Button_SobelY = tk.Button(Frame_P4, text = "4.3 Sobel Y",
+command = lambda:CF.Sobel_Y(),
 width = "20", height = "1")
 Button_SobelY.grid(row = 3, column = 0, padx = 8, pady = 8)
 
 Button_Magnitude = tk.Button(Frame_P4, text = "4.4 Magnitude",
+command = lambda:CF.Magnitude(),
 width = "20", height = "1")
 Button_Magnitude.grid(row = 4, column = 0, padx = 8, pady = 8)
 
